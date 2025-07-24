@@ -1,5 +1,5 @@
 ---
-- name: Setup Jenkins with Java and Docker on t2.micro (with memory limit)
+- name: Install Java and Jenkins on Ubuntu
   hosts: jenkins_node
   become: true
 
@@ -8,56 +8,23 @@
       apt:
         update_cache: yes
 
-    - name: Install required packages
+    - name: Install Java 17 (OpenJDK)
       apt:
-        name:
-          - openjdk-11-jdk
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - gnupg
-          - software-properties-common
-          - wget
+        name: openjdk-17-jdk
         state: present
 
-    - name: Add Docker GPG key
+    - name: Add Jenkins GPG key
       apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
+        url: https://pkg.jenkins.io/debian/jenkins.io.key
         state: present
 
-    - name: Add Docker repository
+    - name: Add Jenkins apt repository
       apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        repo: deb https://pkg.jenkins.io/debian binary/
         state: present
-        filename: docker
+        filename: jenkins
 
-    - name: Update apt cache after Docker repo
-      apt:
-        update_cache: yes
-
-    - name: Install Docker
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: present
-
-    - name: Start and enable Docker
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Add Jenkins GPG key (manual command)
-      shell: |
-        wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | apt-key add -
-
-    - name: Add Jenkins repository
-      shell: |
-        echo deb https://pkg.jenkins.io/debian binary/ > /etc/apt/sources.list.d/jenkins.list
-
-    - name: Update apt cache after Jenkins repo
+    - name: Update apt cache after adding Jenkins repo
       apt:
         update_cache: yes
 
@@ -66,22 +33,8 @@
         name: jenkins
         state: present
 
-    - name: Add jenkins user to docker group
-      user:
-        name: jenkins
-        groups: docker
-        append: yes
-
-    - name: Set Java memory limits for Jenkins
-      lineinfile:
-        path: /etc/default/jenkins
-        regexp: '^JAVA_ARGS='
-        line: 'JAVA_ARGS="-Xmx512m -Djava.awt.headless=true"'
-      notify: Restart Jenkins
-
-  handlers:
-    - name: Restart Jenkins
+    - name: Ensure Jenkins is started and enabled
       systemd:
         name: jenkins
-        state: restarted
+        state: started
         enabled: yes
