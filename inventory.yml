@@ -1,0 +1,2 @@
+[jenkins_node]
+52.91.93.103 ansible_user=ubuntu ansible_ssh_private_key_file=~/devops-key.pem
