@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    environment {
+        IMAGE_NAME = "hangout-app"
+    }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/puja-rathi/HangoutPoint.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d -p 3000:3000 --name test-app $IMAGE_NAME'
+                sh 'sleep 5'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'docker exec test-app npm test'
+            }
+        }
+    }
+    // post {
+    //     always {
+    //         echo 'Cleaning up...'
+    //         sh 'docker stop test-app || true'
+    //         sh 'docker rm test-app || true'
+    //     }
+    // }
+}
