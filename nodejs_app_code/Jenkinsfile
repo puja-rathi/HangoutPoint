@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'docker exec test-app npm test'
+                sh 'docker exec test-app npm test'     //test app code
             }
         }
     }
