@@ -4,10 +4,10 @@ pipeline {
         IMAGE_NAME = "hangout-app"
     }
     stages {
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/puja-rathi/HangoutPoint.git'
-            }
+        stage('Checkout') {
+              steps {
+                git branch: 'main', url: 'https://github.com/puja-rathi/HangoutPoint.git'
+              }
         }
         stage('Build Docker Image') {
             steps {
