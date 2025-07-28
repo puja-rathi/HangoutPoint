@@ -20,6 +20,17 @@ pipeline {
                 sh 'sleep 5'
             }
         }
+
+        stage('Start Monitoring Stack') {
+            steps {
+                dir('monitoring') {
+                    sh 'docker-compose up -d'
+                }
+                sh 'sleep 5' // wait for Prometheus and Grafana to start
+            }
+        }
+
+        
         stage('Test') {
             steps {
                 sh 'docker exec test-app npm test'     //test app code
